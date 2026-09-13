@@ -1,37 +1,47 @@
-# Excel E-Commerce Analytics Guide & Modeling Reference
+# Excel E-Commerce Master Analytics Guide & Architecture Reference
 
-This guide provides step-by-step instructions for navigating, auditing, and extending the financial model and reporting dashboard in `excel/ecommerce_analysis.xlsx`.
+This guide provides step-by-step instructions for navigating, auditing, and extending the consolidated all-in-one financial model and database in:
+- **`excel/ecommerce_analysis.xlsx`** (Master Workbook)
+- **`excel/ecommerce_master_all_in_one.xlsx`** (Consolidated Master All-In-One)
 
 ---
 
-## 1. Workbook Architecture
+## 1. Workbook Architecture (17 Consolidated Sheets)
 
-The workbook contains 8 structured, color-coded sheets designed for C-suite and analyst workflows:
+The workbook consolidates all executive dashboards, analytical financial models, and full underlying databases into one unified Excel file:
 
-| Sheet Name | Purpose | Primary Functions / Features |
-|---|---|---|
-| **Dashboard** | Executive overview with KPI cards, category contribution, and regional summary | Dynamic formulas, merged cards, styled summary tables |
-| **KPI Summary** | Formal enterprise metric dictionary with benchmarks and targets | `SUM`, `AVERAGE`, `COUNTIF`, target benchmarks |
-| **Sales Analysis** | 36-month time series breakdown (2022–2024) | MoM Growth %, Profit Margin %, formatted currency |
-| **Product Analysis** | Top and bottom performers by revenue, margin, and returns | Portfolio segment tags, return rate calculations |
-| **Customer Analysis** | RFM segment breakdown (Champions, At Risk, etc.) | Segment order frequency, average spend, revenue share |
-| **Regional Analysis** | State-level and regional volume, revenue, profit, and AOV | Regional rollups, margin comparisons |
-| **Returns Analysis** | Root-cause breakdown and payment channel performance | Share of returns, payment channel distribution |
-| **Pivot Tables** | Source transaction data table (sample 10,000 transactions) | Structured records for custom pivot table exploration |
+| # | Sheet Name | Category | Record Count | Purpose & Primary Features |
+|---|---|---|---|---|
+| 1 | **Overview & Navigation** | Navigation | 16 Direct Links | Table of contents with clickable `=HYPERLINK()` jumps, KPI summary cards, and workbook index. |
+| 2 | **Dashboard** | Executive | Dynamic Model | C-suite sales & profit dashboard with interactive Year & Month dropdowns, KPI cards, and category & regional tables. |
+| 3 | **KPI Summary** | Governance | 12 Metrics | Master enterprise metric dictionary with benchmark targets, formulas, and operational audits. |
+| 4 | **Sales Analysis** | Financial | 36 Months | 3-year monthly performance time-series (2022–2024), MoM growth %, and net margin %. |
+| 5 | **Product Analysis** | Portfolio | 40 Key SKUs | Top and bottom SKU profitability matrix, return rates, and BCG portfolio classifications. |
+| 6 | **Customer Analysis** | Customer Science | 7 Segments | RFM segmentation summary (Champions, At Risk, etc.), customer count, spend, and revenue shares. |
+| 7 | **Regional Analysis** | Geographic | 35 States / Zones | Regional and state-level volume, gross revenue, net profit margin %, and AOV. |
+| 8 | **Returns Analysis** | Operations | 7 Reasons / 5 Methods | Return root-cause distribution and payment channel performance share. |
+| 9 | **Pivot Tables** | Source Transactions | **52,500 Rows** | Full transactional orders dataset formatted with headers and freeze-panes for custom Excel Pivot Tables. |
+| 10 | **Customers Data** | Master Database | **5,200 Rows** | Complete cleaned customer master directory with signup date, city, state, and segment. |
+| 11 | **Products Data** | Master Database | **550 Rows** | Complete cleaned product catalog with unit costs, base prices, categories, and suppliers. |
+| 12 | **Payments Data** | Master Database | **52,500 Rows** | Complete cleaned payment transaction records with payment methods, status, and dates. |
+| 13 | **Returns Data** | Master Database | **3,676 Rows** | Complete cleaned returns records with return reasons, refund amounts, and status. |
+| 14 | **Customer RFM Profiles** | Analytical Dataset | **5,156 Profiles** | Individual customer RFM scores (1-5), Recency, Frequency, Monetary value, and assigned segment. |
+| 15 | **Product Performance** | Analytical Dataset | **550 Products** | Complete product metrics table with unit margins, return rate %, total revenue, and portfolio tier. |
+| 16 | **Monthly Sales Summary** | Analytical Dataset | **36 Months** | Aggregated monthly financial summary table. |
+| 17 | **Data Audit & Dictionary** | Data Quality | 13 Tables Audited | Raw vs. cleaned data reconciliation audit, data quality scores, and full database schema dictionary. |
 
 ---
 
 ## 2. Core Excel Formulas Implemented
 
-### 1. Dynamic Gross Sales Revenue
+### 1. Dynamic Gross Sales Revenue (Responsive to Year & Month Slicers)
 ```excel
-=SUM('Sales Analysis'!E4:E39)
+=IF(C5="All Months", IF(C4="All Years", SUM('Sales Analysis'!E4:E39), SUMIF('Sales Analysis'!B4:B39, C4, 'Sales Analysis'!E4:E39)), IF(C4="All Years", SUMIF('Sales Analysis'!C4:C39, C5, 'Sales Analysis'!E4:E39), SUMIFS('Sales Analysis'!E4:E39, 'Sales Analysis'!B4:B39, C4, 'Sales Analysis'!C4:C39, C5)))
 ```
-Aggregates monthly revenue dynamically across the 36-month operating horizon.
 
 ### 2. Net Profit Margin Percentage
 ```excel
-=Dashboard!D6 / Dashboard!B6
+=Dashboard!D8 / Dashboard!B8
 ```
 Calculates blended enterprise profit margin (`Total Net Profit / Total Gross Sales`).
 
@@ -41,23 +51,17 @@ Calculates blended enterprise profit margin (`Total Net Profit / Total Gross Sal
 ```
 Calculates revenue acceleration from the previous month, formatted as `0.00%`.
 
-### 4. Order Return Rate via Conditional Counting
+### 4. Enterprise Order Return Rate via Conditional Counting
 ```excel
-=COUNTIF('Pivot Tables'!H4:H50000, "Returned") / Dashboard!F6
+=COUNTIF('Pivot Tables'!H4:H55000, "Returned") / Dashboard!F8
 ```
-Measures the percentage of completed orders that resulted in return processing.
+Audits return rate across all 52,500 transactions against target threshold (<8.0%).
 
-### 5. Multi-Condition Aggregations (`SUMIFS` / `COUNTIFS`)
+### 5. Table of Contents Hyperlink Navigation
 ```excel
-=SUMIFS('Pivot Tables'!F4:F10000, 'Pivot Tables'!K4:K10000, "South", 'Pivot Tables'!H4:H10000, "Delivered")
+=HYPERLINK("#'Dashboard'!A1", "Go to Dashboard")
 ```
-Calculates total delivered sales volume restricted strictly to the Southern territory.
-
-### 6. Dynamic Pricing & Product Lookup (`XLOOKUP`)
-```excel
-=XLOOKUP(A4, 'Product Analysis'!A4:A50, 'Product Analysis'!F4:F50, "Not Found", 0)
-```
-Retrieves the total lifetime revenue for any given `product_id`.
+Enables 1-click jump navigation directly to any sheet within the workbook.
 
 ---
 
@@ -67,22 +71,15 @@ Follow these steps in Microsoft Excel to create interactive pivots from the `Piv
 
 ### Step 1: Regional Profitability Pivot Table
 1. Navigate to sheet `Pivot Tables`.
-2. Select range `A3:K10004` and click **Insert > PivotTable**.
-3. Place on a **New Worksheet**.
+2. Select range `A3:L52503` (or click cell `A3` and press `Ctrl + A`).
+3. Click **Insert > PivotTable** > **New Worksheet**.
 4. Drag fields into areas:
    - **Rows**: `region`, `state`
-   - **Values**: `sales_amount` (Summarize by Sum, Format as Currency `₹ #,##0`), `profit_amount` (Summarize by Sum)
+   - **Values**: `sales_amount` (Summarize by Sum, Format Currency `₹ #,##0`), `profit_amount` (Summarize by Sum)
    - **Calculated Field**: Name = `Profit Margin %`, Formula = `=profit_amount / sales_amount`.
 
 ### Step 2: Customer Status Matrix
-1. Select transaction table and create a Pivot Table.
+1. Select transaction table in `Pivot Tables`.
 2. Drag `order_status` to **Rows**.
 3. Drag `order_id` to **Values** (Summarize by Count).
 4. Drag `sales_amount` to **Values** (Show Values As > **% of Grand Total**).
-
----
-
-## 4. Conditional Formatting Rules Applied
-- **Profit Margin Column**: Green-Yellow-Red color gradient highlighting high-margin (>40%) vs low-margin (<15%) categories.
-- **Top 10 Performers**: Soft green highlight for the top 10% revenue-generating products.
-- **High Return Alert**: Light red fill applied to return rates exceeding the 10.0% threshold.
